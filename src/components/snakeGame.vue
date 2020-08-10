@@ -1,29 +1,34 @@
 <template>
   <div>
-    <v-simple-table dir="ltr" class="box">
+    <input @keyup.up="turn('up')" @keyup.left="turn('left')" @keyup.down="turn('down')" @keyup.right="turn('right')" />
+    <v-simple-table style="width: 520px; height: 400px; align-content: center" dir="ltr">
       <tbody>
       <tr v-for="row of net">
         <td
-            :class="(col == 100 ) ? 'squre_black' : (col[2] == 555 ) ? 'squre_yellow' :'squre'"
+            :class="(col === 100 ) ? 'squre_black' : (col[2] === 555 ) ? 'squre_yellow' :'squre'"
             v-for="col of row"
-
+            style="width: 1px; height: 40px; align-content: center"
         >
 
         </td>
       </tr>
       </tbody>
     </v-simple-table>
+    <div style="padding: 90px" class="joyStick">
     <v-col>
       <v-row>
-        <v-btn @click="turn('up')" v-on:keyup.up="turn('up')">up</v-btn>
-        <v-btn @click="turn('right')">right</v-btn>
-        <v-btn @click="turn('down')">down</v-btn>
-        <v-btn @click="turn('left')">left</v-btn>
+        <v-btn style="visibility: hidden;"></v-btn>
+        <v-btn style="font-size: 1.7rem" @click="turn('up')" >^</v-btn>
+        <v-btn style="visibility: hidden;"></v-btn>
+        <v-btn @click="turn('right')" ><--</v-btn>
+        <v-btn @click="turn('down')" >v</v-btn>
+        <v-btn @click="turn('left')" >--></v-btn>
       </v-row>
 
       <span v-if="even">אורך הנחש: {{ snake.length }} </span>
       <span>ניקוד: {{ score }} </span>
     </v-col>
+    </div>
   </div>
 </template>
 
@@ -152,6 +157,21 @@ export default {
   },
   mounted() {
     this.createSnake()
+    window.addEventListener('keydown', (e) => {
+      // const kayArray = [3]
+      if (e.key == 'ArrowUp') {
+        this.turn('up')
+      }
+      if (e.key == 'ArrowLeft') {
+        this.turn('left')
+      }
+      if (e.key == 'ArrowDown') {
+        this.turn('down')
+      }
+      if (e.key == 'ArrowRight') {
+        this.turn('right')
+      }
+    });
   }
 
 }
@@ -161,14 +181,21 @@ export default {
 .squre {
   background-color: aquamarine;
 }
-
+.squre_yellow {
+  background-color: yellow;
+}
 .squre_black {
   background-color: black;
 }
-
+td{
+  height: 1px;
+  width: 1px;
+}
 .box{
-  height: 700px;
-  width: 400px;
   align-content: center;
+}
+.joyStick{
+  position: absolute;
+  top: 400px;
 }
 </style>

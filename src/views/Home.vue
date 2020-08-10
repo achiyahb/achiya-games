@@ -1,20 +1,28 @@
 <template>
    <v-container >
   <div class="home">
-<h1> איקס עיגול</h1>
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+<h1>ברוכים הבאים</h1>
+     <div>
+    <v-btn @click="$router.push('/snake')">סנייק</v-btn>
+     </div>
+    <div>
+      <v-btn @click="$router.push('/x-and-o')">איקס עיגול</v-btn>
+    </div>
+    <div>
+      <v-btn @click="$router.push('/mine-sweeper')">שולה מוקשים</v-btn>
+    </div>
+    <div>
+      <span>בפיתוח</span>
+      <v-btn @click="$router.push('/tetris')">טטריס</v-btn>
+    </div>
   </div>
    </v-container>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/circleAndExes.vue'
 
 export default {
   name: 'Home',
-  components: {
-    HelloWorld
-  }
+
 }
 </script>

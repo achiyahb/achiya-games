@@ -32,9 +32,8 @@
     }),
     methods: {
       chooseTurn(key, num) {
-        if(this.x[key][num - 1].length){
-          return
-        }
+        if(this.winner) return
+        if(this.x[key][num - 1].length) return
         this.x[key][num - 1] = [num, !this.circle ? 'X' : 'O']
         this.circle = !this.circle
         this.numTurn++
