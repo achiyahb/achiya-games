@@ -223,6 +223,6 @@ td{
 .icon{
   height: 20px;
   width: 20px;
-  position: absolute;
+
 }
 </style>
