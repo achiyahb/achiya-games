@@ -13,7 +13,9 @@
             @contextmenu.prevent="flag(xKey,yKey)"
             style="width: 1px; height: 40px; align-content: center; font-size: 1rem; border-color: black;"
         >
-{{col[1] === 'flag' ? 'F' : (col[1] === 'show' && col[0] !== 'cl') ? col[0] : ''}}
+{{col[1] === 'flag' ? '' : (col[1] === 'show' && col[0] !== 'cl' && col[0] !== 'M') ? col[0] : ''}}
+          <v-img v-if="col[1] === 'flag'" class="icon" :src="require('../assets/redflag.png')" ></v-img>
+          <v-img v-if="col[0] === 'M' && col[1] === 'show'" class="icon" :src="require('../assets/mine.svg')" ></v-img>
         </td>
       </tr>
       </tbody>
@@ -171,7 +173,7 @@ export default {
     },
 
   flag(xKey,yKey){
-      if (!this.start) return
+      if (!this.start || this.gameOver || this.net[yKey][xKey][1] === 'show') return
     if (this.net[yKey][xKey][1] !== 'flag'){
       const arrayReveal = []
       arrayReveal.push(this.net[yKey][xKey])
@@ -207,13 +209,8 @@ td{
 .box{
   align-content: center;
 }
-.joyStick{
-  position: absolute;
-  top: 400px;
-}
-</style>
 
-<style>
+
 .mine{
   background-color: red;
 }
@@ -222,5 +219,10 @@ td{
 }
 .flag{
   background-color: yellow;
+}
+.icon{
+  height: 20px;
+  width: 20px;
+  position: absolute;
 }
 </style>
