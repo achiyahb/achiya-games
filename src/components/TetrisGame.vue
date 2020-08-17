@@ -1,10 +1,10 @@
 <template>
-  <div @keyup.up="turn('up')" @keyup.left="turn('left')" @keyup.down="turn('down')" @keyup.right="turn('right')">
+  <div>
     <v-simple-table style="width: 520px; height: 400px; align-content: center" dir="ltr">
       <tbody>
       <tr v-for="row of net">
         <td
-            :class="(col == 100 ) ? 'squre_black' : (col[2] == 555 ) ? 'squre_yellow' :'squre'"
+            :class="(col[2] === 'red' ) ? 'squre_red' : (col[2] === 555 ) ? 'squre_yellow' :'squre'"
             v-for="col of row"
             style="width: 1px; height: 27px; align-content: center"
         >
@@ -14,20 +14,19 @@
       </tbody>
     </v-simple-table>
     <div style="padding: 100px" class="joyStick">
-    <v-col
-    cols="12"
-    >
-      <v-row>
-        <v-btn style="visibility: hidden;"></v-btn>
-        <v-btn style="font-size: 1.7rem" @click="turn('up')"  >^</v-btn>
-        <v-btn style="visibility: hidden;"></v-btn>
-        <v-btn @click="turn('right')" ><--</v-btn>
-        <v-btn @click="turn('down')" >v</v-btn>
-        <v-btn @click="turn('left')" >--></v-btn>
-      </v-row>
-      <input @keyup.up="turn('up')" @keyup.left="turn('left')" @keyup.down="turn('down')" @keyup.right="turn('right')"/>
-      <span>ניקוד: {{ score }} </span>
-    </v-col>
+      <v-col
+          cols="12"
+      >
+        <v-row>
+          <v-btn style="visibility: hidden;"></v-btn>
+          <v-btn style="font-size: 1.7rem" @click="turn('up')" >^</v-btn>
+          <v-btn style="visibility: hidden;"></v-btn>
+          <v-btn @click="turn('right')" ><--</v-btn>
+          <v-btn @click="turn('down')" >v</v-btn>
+          <v-btn @click="turn('left')" >--></v-btn>
+        </v-row>
+        <span>ניקוד: {{ score }} </span>
+      </v-col>
     </div>
   </div>
 </template>
@@ -37,23 +36,47 @@ export default {
   name: "snakeGame",
   props: ['number'],
   data: () => ({
-    even: true,
-    snake: [],
     net: [],
-    head: [],
-    apple: [],
-    right: true,
-    up: false,
-    down: false,
-    left: false,
     score: 0,
-    sideChoose: false
+    sideChoose: false,
+    turnCounter: 0,
+    play: true,
+    stopFall: false,
+    block:[0,0,0,0,0,0,0,0,0,0],
+    x: null,
+    y: null
   }),
   methods: {
     gamePlay(){
+      const self = this
+      this.x = 5
+      this.y = 0
+      this.nextSec(self)
+    },
+    nextSec(self){
+      this.$forceUpdate()
+      this.y++
+      this.net[this.y][this.x].push('red')
+      if(this.y - 1 !== 0) this.net[this.y - 1][this.x].pop()
+      this.turnCounter++
+      if (this.y === this.net.length - this.block[this.x] || this.net[this.y + 1][this.x][2] === 'red'){
+        this.block[this.x] = this.net.length - this.y + 1
+        this.gamePlay()
+      } else if (this.turnCounter === 10000){
+        this.play=false
+      } else {
+        window.setTimeout(function () {self.nextSec(self)}, 1500);
+      }
+    },
+    turn(){
 
     },
-
+    turnSide(side){
+      if (this.x === 0 && side === -1 || this.x === this.block.length-1 && side === 1) return
+      this.x = this.x + side
+      if(this.y !== 0) this.net[this.y - 1][this.x - side].pop()
+      this.$forceUpdate()
+    },
     set(){
       const j = this.number
       for (let i = 0; i < 20; i++) {
@@ -69,11 +92,27 @@ export default {
     }
   },
   created() {
-this.set()
+    this.set()
   },
   mounted() {
-    this.start()
+    this.gamePlay()
+    window.addEventListener('keydown', (e) => {
+      // const kayArray = [3]
+      if (e.key == 'ArrowUp') {
+        this.turn('up')
+      }
+      if (e.key == 'ArrowLeft') {
+        this.turnSide(-1)
+      }
+      if (e.key == 'ArrowDown') {
+        this.turn('down')
+      }
+      if (e.key == 'ArrowRight') {
+        this.turnSide(1)
+      }
+    });
   }
+
 
 }
 </script>
@@ -85,8 +124,8 @@ this.set()
 .squre_yellow {
   background-color: yellow;
 }
-.squre_black {
-  background-color: black;
+.squre_red {
+  background-color: red;
 }
 .joyStick{
   position: absolute;
