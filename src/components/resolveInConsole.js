@@ -1,7 +1,3 @@
-
-
-
-
 // declare
 let squareWithNumber = []
 let allSquares = []
