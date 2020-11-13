@@ -2,30 +2,61 @@
   <div>
     <h4 v-if="gameOver">המשחק נגמר</h4>
     <h2 v-if="win">ניצחת!!!</h2>
-    <span>משבצות מכוסות: {{squareNum-revealSquare}}, מספר דגלים: {{flags}}  </span>
-    <v-simple-table style="width: 520px; align-content: center; border-color: black" dir="ltr">
-      <tbody>
-      <tr v-for="(row,yKey) of net" style="border-color: black;">
-        <td
-            :class="col[1] === 'flag' ? 'flag' : col[1] !== 'show' ? 'squre' : col[0] === 'M' ? 'mine' : ''"
-            v-for="(col,xKey) of row"
-            @click="choose(xKey,yKey)"
-            @contextmenu.prevent="flag(xKey,yKey)"
-            style="width: 1px; height: 40px; align-content: center; font-size: 1rem; border-color: black;"
+    <div>
+      <div>
+    <span
+        :class="`rounded-r-lg ${plus? 'grey lighten-1':'grey lighten-2'}`"
+        style="padding: 2px 9px 2px 9px;"
+        @click="changeSize(1)"
+    >+</span>
+    <span
+        :class="`rounded-l-lg ${!plus? 'grey lighten-1':'grey lighten-2'}`"
+        style="padding: 2px 9px 2px 9px;"
+        @click="changeSize(-1)"
+    >-</span>
+    </div>
+    </div>
+      <div style="display: flex">
+        <span>משבצות מכוסות: {{ squareNum - revealSquare }}, דגלים: {{ flags }} </span>
+        <v-spacer></v-spacer>
+        <span>זמן- </span>
+        <timer :start="start" :stop="gameOver"/>
+      </div>
+
+
+
+    <div dir="ltr" :style="`width: ${width}rem; display: grid;grid-template-columns: repeat(${number}, 1fr);`">
+      <div v-for="(row,xKey) of net" class="box">
+        <div
+            :class="col[1] === 'flag' ? 'flag' : col[1] !== 'show' ? 'square' : col[0] === 'M' ? 'mine' : ''"
+            v-for="(col,yKey) of row"
+            @click="choose(yKey,xKey)"
+            @contextmenu.prevent="flag(yKey,xKey)"
+            style="align-content: center;"
         >
-{{col[1] === 'flag' ? '' : (col[1] === 'show' && col[0] !== 'cl' && col[0] !== 'M') ? col[0] : ''}}
-          <v-img v-if="col[1] === 'flag'" class="icon" :src="require('../assets/redflag.png')" ></v-img>
-          <v-img v-if="col[0] === 'M' && col[1] === 'show'" class="icon" :src="require('../assets/mine.svg')" ></v-img>
-        </td>
-      </tr>
-      </tbody>
-    </v-simple-table>
+          <div
+              :class="(col[1] !== 'show')?((yKey+xKey)%2 !== 0 ? 'green darken-1':'green lighten-1') : col[1] !== 'show' ? '' : col[0] === 'M' ? 'mine' : ((yKey+xKey)%2 !== 0 ? 'grey lighten-4':'grey lighten-5')"
+
+              :style="`text-align: center; width: ${width/number}rem; height: ${width/number}rem;`"
+
+          >
+            <span> {{ col[1] === 'flag' ? '' : (col[1] === 'show' && col[0] !== 'cl' && col[0] !== 'M') ? col[0] : '' }}
+             <v-img v-if="col[1] === 'flag'" class="icon" :src="require('../assets/redflag.png')"></v-img>
+          <v-img v-if="col[0] === 'M' && col[1] === 'show'" class="icon" :src="require('../assets/mine.svg')"></v-img>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script>
+import Timer from "@/components/tools/timer";
 export default {
   name: "snakeGame",
+  components: {Timer},
   props: ['number'],
   data: () => ({
     start: false,
@@ -36,35 +67,38 @@ export default {
     squareNum: null,
     revealSquare: null,
     flags: 0,
-    win: false
+    win: false,
+    width: null,
+    mineNumber: null,
+    plus: false
   }),
   methods: {
-    choose(xKey,yKey){
-      if (this.net[yKey][xKey][1] === 'flag' || this.net[yKey][xKey][1] === 'show' || this.gameOver){
+    choose(xKey, yKey) {
+      if (this.net[yKey][xKey][1] === 'flag' || this.net[yKey][xKey][1] === 'show' || this.gameOver) {
         return
       }
-      if (!this.start){
-        this.creatClearArea(xKey,yKey)
+      if (!this.start) {
+        this.creatClearArea(xKey, yKey)
         this.creatMines()
         this.setNumbers()
         this.start = true
       }
-      if (this.net[yKey][xKey] === 'cl'){
-        this.RevealClear(xKey,yKey)
+      if (this.net[yKey][xKey] === 'cl') {
+        this.RevealClear(xKey, yKey)
       } else {
-        this.RevealExist(xKey,yKey)
-        if (this.net[yKey][xKey][0] === 'M'){
+        this.RevealExist(xKey, yKey)
+        if (this.net[yKey][xKey][0] === 'M') {
           this.gameOver = true
         }
       }
       this.$forceUpdate()
     },
-    creatClearArea(xKey,yKey){
+    creatClearArea(xKey, yKey) {
       const j = this.number
-        for (let y = yKey-1; y <= yKey+1; y++) {
-          for (let x = xKey-1; x <= xKey+1; x++){
-            if (y < 0 || y >= j) continue
-            if (x < 0 || x >= j) continue
+      for (let y = yKey - 1; y <= yKey + 1; y++) {
+        for (let x = xKey - 1; x <= xKey + 1; x++) {
+          if (y < 0 || y >= j) continue
+          if (x < 0 || x >= j) continue
           this.net[y][x] = 'clear'
         }
       }
@@ -72,7 +106,8 @@ export default {
     creatMines() {
       const self = this
       let i = 0;
-      while (i < 15) {
+      this.mineNumber = Math.floor(this.squareNum * 15 / 100) + 1
+      while (i < this.mineNumber) {
         let x = Math.floor(Math.random() * this.number)
         let y = Math.floor(Math.random() * this.number)
         if (this.net[y][x] === 'M' || this.net[y][x] === 'clear') {
@@ -88,37 +123,35 @@ export default {
       const j = this.number
       for (let x = 0; x < j; x++) {
         for (let y = 0; y < j; y++) {
-          if (x===9 && y===9){
-            console.log(x)
-          }
           if (self.net[y][x] === 'M') {
             continue
           }
           let counter = 0
           for (let i = -1; i < 2; i++) {
-            if (y===0 || x===0 && (i === -1 || i+x === j)){
+            if (y === 0 || x === 0 && (i === -1 || i + x === j)) {
               continue
             }
-            let num = self.net[y - 1][x+i] ? self.net[y - 1][x+i] : 'null'
+            let num = self.net[y - 1][x + i] ? self.net[y - 1][x + i] : 'null'
             if (num === 'M') {
               counter++
             }
           }
           for (let k = -1; k < 2; k++) {
-            if (x===0 && (k === -1 || k+x === j)){
+            if (x === 0 && (k === -1 || k + x === j)) {
               continue
             }
-            let numY = self.net[y][x+k]
-            let num = self.net[y][x+k]? self.net[y][x+k] : 'null'
+            let num = self.net[y][x + k] ? self.net[y][x + k] : 'null'
             if (num === 'M') {
               counter++
             }
           }
           for (let g = -1; g < 2; g++) {
-            if (y + 1 === j || x === 0 && (g === -1 || g + x === j)) {
+            if (y + 1 == j || x === 0 && (g === -1 || g + x == j)) {
               continue
             }
-            let numZ = self.net[y + 1][x + g]
+            if (y === this.number - 1) {
+              console.log([x, y])
+            }
             let num = self.net[y + 1][x + g] ? self.net[y + 1][x + g] : 'null'
             if (num === 'M') {
               counter++
@@ -128,9 +161,9 @@ export default {
         }
 
       }
-      console.log(self.net)
     },
     setGame() {
+      this.width = 20
       const self = this
       const j = this.number
       for (let i = 0; i < j; i++) {
@@ -145,49 +178,57 @@ export default {
         this.net.push(array)
       }
     },
-    RevealExist(xKey,yKey){
+    RevealExist(xKey, yKey) {
       const arrayReveal = []
       arrayReveal.push(this.net[yKey][xKey])
       arrayReveal.push('show')
       this.net[yKey][xKey] = arrayReveal
-      if(this.net[yKey][xKey][0] !== 'M') this.revealSquare++
-      if (this.squareNum - this.revealSquare === 15){
+      if (this.net[yKey][xKey][0] !== 'M') this.revealSquare++
+      if (this.squareNum - this.revealSquare === this.mineNumber) {
         this.gameOver = true
         this.win = true
       }
     },
-    RevealClear(xKey,yKey) {
-        const self = this
-        const j = this.number
-        for (let y = yKey-1; y <= yKey+1; y++) {
-          for (let x = xKey-1; x <= xKey+1; x++){
-            if (y < 0 || y >= j) continue
-            if (x < 0 || x >= j) continue
-            if (self.net[y][x][1] === 'show' || self.net[y][x][1] === 'flag') continue
-              self.RevealExist(x,y)
-            if (self.net[y][x][0] === 'cl'){
-              self.RevealClear(x,y)
-            }
+    RevealClear(xKey, yKey) {
+      const self = this
+      const j = this.number
+      for (let y = yKey - 1; y <= yKey + 1; y++) {
+        for (let x = xKey - 1; x <= xKey + 1; x++) {
+          if (y < 0 || y >= j) continue
+          if (x < 0 || x >= j) continue
+          if (self.net[y][x][1] === 'show' || self.net[y][x][1] === 'flag') continue
+          self.RevealExist(x, y)
+          if (self.net[y][x][0] === 'cl') {
+            self.RevealClear(x, y)
           }
         }
+      }
     },
 
-  flag(xKey,yKey){
+    flag(xKey, yKey) {
       if (!this.start || this.gameOver || this.net[yKey][xKey][1] === 'show') return
-    if (this.net[yKey][xKey][1] !== 'flag'){
-      const arrayReveal = []
-      arrayReveal.push(this.net[yKey][xKey])
-      arrayReveal.push('flag')
-      this.net[yKey][xKey] = arrayReveal
-      this.flags++
-    } else {
-      this.net[yKey][xKey].pop()
-      let swap = this.net[yKey][xKey][0]
-      this.net[yKey][xKey] = swap
-      this.flags--
+      if (this.net[yKey][xKey][1] !== 'flag') {
+        const arrayReveal = []
+        arrayReveal.push(this.net[yKey][xKey])
+        arrayReveal.push('flag')
+        this.net[yKey][xKey] = arrayReveal
+        this.flags++
+      } else {
+        this.net[yKey][xKey].pop()
+        let swap = this.net[yKey][xKey][0]
+        this.net[yKey][xKey] = swap
+        this.flags--
+      }
+      this.$forceUpdate()
+    },
+    changeSize(i) {
+      this.width = this.width + 2*i
+      if (i === -1){
+        this.plus = false
+      } else {
+        this.plus = true
+      }
     }
-    this.$forceUpdate()
-  }
   },
   mounted() {
     this.setGame()
@@ -197,32 +238,11 @@ export default {
 </script>
 
 <style scoped>
-.squre {
-  background-color: aquamarine;
-  border: 1px black;
-}
-
-td{
-  height: 1px;
-  width: 1px;
-}
-.box{
-  align-content: center;
-}
-
-
-.mine{
+.mine {
   background-color: red;
 }
-.tey{
-  color: yellow;
-}
-.flag{
-  background-color: yellow;
-}
-.icon{
-  height: 20px;
-  width: 20px;
 
+.icon {
+  size: 5rem;
 }
 </style>

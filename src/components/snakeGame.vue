@@ -16,14 +16,14 @@
     </v-simple-table>
     <div style="padding: 90px" class="joyStick">
     <v-col>
-      <v-row>
+      <div  style="width: 10rem;display: grid;grid-template-columns: repeat(3, 1fr)">
         <v-btn style="visibility: hidden;"></v-btn>
         <v-btn style="font-size: 1.7rem" @click="turn('up')" >^</v-btn>
         <v-btn style="visibility: hidden;"></v-btn>
         <v-btn @click="turn('right')" ><--</v-btn>
         <v-btn @click="turn('down')" >v</v-btn>
         <v-btn @click="turn('left')" >--></v-btn>
-      </v-row>
+      </div>
 
       <span v-if="even">אורך הנחש: {{ snake.length }} </span>
       <span>ניקוד: {{ score }} </span>

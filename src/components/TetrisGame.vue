@@ -1,39 +1,51 @@
 <template>
   <div>
-    <v-simple-table style="width: 520px; height: 400px; align-content: center" dir="ltr">
-      <tbody>
-      <tr v-for="row of net">
-        <td
-            :class="(col[2] === 'red' ) ? 'squre_red' : (col[2] === 555 ) ? 'squre_yellow' :'squre'"
-            v-for="col of row"
-            style="width: 1px; height: 27px; align-content: center"
-        >
-
-        </td>
-      </tr>
-      </tbody>
-    </v-simple-table>
-    <div style="padding: 100px" class="joyStick">
-      <v-col
-          cols="12"
-      >
-        <v-row>
-          <v-btn style="visibility: hidden;"></v-btn>
-          <v-btn style="font-size: 1.7rem" @click="turn('up')" >^</v-btn>
-          <v-btn style="visibility: hidden;"></v-btn>
-          <v-btn @click="turn('right')" ><--</v-btn>
-          <v-btn @click="turn('down')" >v</v-btn>
-          <v-btn @click="turn('left')" >--></v-btn>
-        </v-row>
-        <span>ניקוד: {{ score }} </span>
-      </v-col>
+    <div dir="ltr" style=" width: 17rem; display: grid;grid-template-columns: repeat(10, 1fr)">
+      <div v-for="row of net">
+        <div v-for="col of row">
+          <div
+              :class="col[2] ? (col[2].color? `${col[2].color} lighten-1` : '') :((col[0] + col[1])%2 !== 0 ? 'blue lighten-4':'blue lighten-5')"
+              style="width: 1.7rem; height: 1.7rem; font-size: 10px; border: black"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <timer :start="start" :stop="gameOver"/>
+      <span>ניקוד: {{ score }} רמה: {{ level }}</span>
+    </div>
+    <div style=" display: flex;">
+    <div dir="ltr" style=" width: 8rem; display: grid;grid-template-columns: repeat(10, 1fr)">
+      <div v-for="row of nextShapeNet">
+        <div v-for="col of row">
+          <div
+              :class="col[2] ? (col[2].color? `${col[2].color} lighten-1` : '') :((col[0] + col[1])%2 !== 0 ? 'blue lighten-4':'blue lighten-5')"
+              style="width: 2rem; height: 2rem; font-size: 10px; border: black"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div  style="width: 10rem;display: grid;grid-template-columns: repeat(3, 1fr)">
+      <v-btn style="visibility: hidden;"></v-btn>
+      <v-btn style="font-size: 1.7rem" @click="turnUp()">^</v-btn>
+      <v-btn style="visibility: hidden;"></v-btn>
+      <v-btn @click="turnSide(1)"><--</v-btn>
+      <v-btn @click="turnDown">v</v-btn>
+      <v-btn @click="turnSide(-1)">--></v-btn>
+    </div>
     </div>
   </div>
 </template>
 
 <script>
+import tetrisShapes from "@/components/tetrisDirectory/tetrisShapes";
+import Timer from "@/components/tools/timer";
+
 export default {
   name: "snakeGame",
+  components: {Timer},
   props: ['number'],
   data: () => ({
     net: [],
@@ -42,46 +54,358 @@ export default {
     turnCounter: 0,
     play: true,
     stopFall: false,
-    block:[0,0,0,0,0,0,0,0,0,0],
+    block: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     x: null,
-    y: null
+    y: null,
+    clearArray: [],
+    switch: null,
+    switchIndex: 0,
+    setNewShape: true,
+    shapesIndex: [],
+    shapesCounter: 0,
+    stop: false,
+    height: 20,
+    start: false,
+    gameOver: false,
+    level: 1,
+    time: 1500,
+    ticker: null,
+    downButton: false,
+    downSec: false,
+    nextShapeNet: [],
+    clearArrayNext: []
   }),
   methods: {
-    gamePlay(){
-      const self = this
+    gamePlay() {
+      if (this.gameOver) {
+        return
+      }
+      this.displayNextShape()
       this.x = 5
       this.y = 0
-      this.nextSec(self)
-    },
-    nextSec(self){
-      this.$forceUpdate()
-      this.y++
-      this.net[this.y][this.x].push('red')
-      if(this.y - 1 !== 0) this.net[this.y - 1][this.x].pop()
-      this.turnCounter++
-      if (this.y === this.net.length - this.block[this.x] || this.net[this.y + 1][this.x][2] === 'red'){
-        this.block[this.x] = this.net.length - this.y + 1
-        this.gamePlay()
-      } else if (this.turnCounter === 10000){
-        this.play=false
-      } else {
-        window.setTimeout(function () {self.nextSec(self)}, 1500);
+      if (this.start) {
+        this.nextSec()
+        this.start = false
       }
-    },
-    turn(){
 
     },
-    turnSide(side){
-      if (this.x === 0 && side === -1 || this.x === this.block.length-1 && side === 1) return
-      this.x = this.x + side
-      if(this.y !== 0) this.net[this.y - 1][this.x - side].pop()
-      this.$forceUpdate()
+    goDown(button) {
+
+      if (!button) {
+        if (this.downButton) {
+          return
+        } else {
+          this.y++
+          this.downSec = false
+        }
+      } else {
+        if (this.downSec) {
+          return
+        } else {
+          this.y++
+
+        }
+      }
+
+
     },
-    set(){
-      const j = this.number
-      for (let i = 0; i < 20; i++) {
+    nextSec() {
+
+      this.ticker = setInterval(() => {
+
+        if (this.gameOver) {
+          return
+        }
+        if (this.clearArray.length !== 0) {
+          this.checkBlock()
+        }
+        this.displayShape()
+        this.checkDown() ? this.goDown() : ''
+      }, this.time)
+    },
+    clearLastSec() {
+      for (let point of this.clearArray) {
+        let x = point[0]
+        let y = point[1]
+        this.net[x][y].pop()
+        this.net[x][y].pop()
+      }
+      this.clearArray = []
+    },
+    clearNextShape() {
+      for (let point of this.clearArrayNext) {
+        let x = point[0]
+        let y = point[1]
+        this.nextShapeNet[x][y].pop()
+      }
+      this.clearArrayNext = []
+    },
+    displayShape() {
+      let shape = this.shape()
+      let center = [this.x, this.y]
+      let switchIt = this.switchIt()
+      let ExSw = shape.extraSwitch
+      this.clearLastSec()
+      for (let index in shape.units) {
+        if (shape.units[index][2]) {
+          this.net[this.x][this.y].push(shape)
+          this.net[this.x][this.y].push('move')
+          this.clearArray.push(center)
+        } else {
+          let x
+          let y
+          if (switchIt[1]) {
+            x = center[0] + shape.units[index][0] * switchIt[0]
+            y = center[1] + shape.units[index][1] * switchIt[0]
+          } else {
+            y = center[1] + shape.units[index][0] * switchIt[0]
+            x = center[0] + shape.units[index][1] * switchIt[0] * ExSw
+          }
+          this.net[x][y].push(shape)
+          this.net[x][y].push('move')
+          this.clearArray.push([x, y])
+        }
+      }
+    },
+    checkRound() {
+      let x
+      let y
+      let clearWay = true
+      let shape = this.shape()
+      let center = [this.x, this.y]
+      let switchIndex = this.switchIndex === shape.switch.length - 1 ? 0 : this.switchIndex + 1
+      let checkSwitch = shape.switch[switchIndex]
+      let switchIt = this.switchIt(checkSwitch)
+      let ExSw = shape.extraSwitch
+      for (let index in shape.units) {
+        if (!shape.units[index][2]) {
+          if (switchIt[1]) {
+            x = center[0] + shape.units[index][0] * switchIt[0]
+            y = center[1] + shape.units[index][1] * switchIt[0]
+          } else {
+            y = center[1] + shape.units[index][0] * switchIt[0]
+            x = center[0] + shape.units[index][1] * switchIt[0] * ExSw
+          }
+          if (x < 0 || x > 9 || y < 0 || y > 19) {
+            clearWay = false
+          } else if (this.net[x][y][3] === 'block') {
+            clearWay = false
+          }
+        }
+      }
+      return clearWay
+    },
+    switchIt(check) {
+      let switch1 = check ? check : this.switch
+      let switchArr = []
+      switchArr.push((switch1 === 'up' || switch1 === 'right') ? -1 : 1)
+      switchArr.push((switch1 === 'up' || switch1 === 'down') ? 1 : 0)
+      return switchArr
+    },
+    checkDown() {
+      let clearWay = true
+      for (let point of this.clearArray) {
+        let x = point[0]
+        let y = point[1]
+        if (y >= 19 && this.net[x][y][3] === 'move') {
+          clearWay = false
+        } else if (this.net[x][y + 1][3] === 'block' && this.net[x][y][3] === 'move') {
+          clearWay = false
+        }
+      }
+      return clearWay
+    },
+    checkBlock() {
+      for (let point of this.clearArray) {
+        let x = point[0]
+        let y = point[1]
+        if (y >= 19 && this.net[x][y][3] === 'move') {
+          this.setBlock()
+        } else if (this.net[x][y + 1][3] === 'block' && this.net[x][y][3] === 'move') {
+          this.setBlock()
+        }
+      }
+    },
+    setBlock() {
+      for (let point of this.clearArray) {
+        let x = point[0]
+        let y = point[1]
+        let swap = this.net[x][y][2]
+        let block = {}
+        block.color = swap.color
+        this.net[x][y][2] = block
+        this.net[x][y][3] = 'block'
+        this.height = y < this.height ? y : this.height
+        if (this.height === 0) {
+          this.gameOver = true
+        }
+      }
+      this.checkRows()
+      this.clearArray = []
+      this.setNewShape = true
+      this.shapesCounter++
+      this.gamePlay()
+
+    },
+    displayNextShape() {
+      let shape = this.shape(1)
+      let center = [1, 0]
+      this.clearNextShape()
+      for (let index in shape.units) {
+        if (shape.units[index][2]) {
+          this.nextShapeNet[1][0].push(shape)
+          this.clearArrayNext.push(center)
+        } else {
+          let x = center[0] + shape.units[index][0]
+          let y = center[1] + shape.units[index][1]
+          this.nextShapeNet[x][y].push(shape)
+          this.clearArrayNext.push([x, y])
+        }
+      }
+
+    },
+    checkRows() {
+      let remove = []
+      for (let i = this.height; i <= 19; i++) {
+        let counter = 0
+        for (let j = 0; j < 10; j++) {
+          if (this.net[j][i][3] === 'block') {
+            counter++
+          } else {
+            break
+          }
+          if (counter === 10) {
+            remove.push(i)
+            this.score = this.score + 10
+            if (this.score % 70 === 0) {
+              this.level++
+              this.time = 1500 - 150 * this.level
+              console.log(this.time)
+              this.ticker = null
+              console.log(this.ticker)
+              this.nextSec()
+              console.log(this.ticker)
+            }
+          }
+        }
+      }
+      if (remove.length) {
+        this.deleteRow(remove)
+      }
+    },
+    deleteRow(rowToRemove) {
+      const self = this
+      for (let row of rowToRemove) {
+        for (let x = 0; x < 10; x++) {
+          this.net[x][row].pop()
+          this.net[x][row].pop()
+          this.net[x][row].push({color: 'grey'})
+          setTimeout(function () {
+            self.net[x][row].pop()
+          }, 500)
+        }
+        setTimeout(function () {
+          self.rowDown(row)
+        }, 500)
+      }
+    },
+    rowDown(row) {
+
+      if (row > this.height) {
+        for (let y = row - 1; y >= this.height; y--) {
+          for (let x = 0; x < 10; x++) {
+            if (this.net[x][y][2]) {
+              this.net[x][y + 1][2] = this.net[x][y][2]
+              this.net[x][y + 1][3] = this.net[x][y][3]
+              this.net[x][y].pop()
+              this.net[x][y].pop()
+            }
+          }
+        }
+      }
+    },
+    // nextSec() {
+    //   const self = this
+    //   if (this.clearArray.length !== 0) {
+    //     this.checkBlock()
+    //   }
+    //   this.displayShape()
+    //   this.y++
+    //   this.nextSec()
+    //   window.setTimeout(function () {
+    //     self.stopIf()
+    //   }, 2000);
+    // },
+    checkSide(side) {
+      let clearWay = true
+      let location = this.clearArray
+      for (let i in location) {
+        let x = location[i][0]
+        let y = location[i][1]
+        if (x + side === -1 || x + side === 10) {
+          clearWay = false
+        } else if (this.net[x + side][y][3] === 'block') {
+          clearWay = false
+        }
+      }
+      return clearWay
+    },
+    turnUp() {
+      let allow = this.checkRound()
+      if (!allow) {
+        return
+      }
+      let shapeSwitch = this.shape().switch
+      if (this.switchIndex < shapeSwitch.length - 1) {
+        this.switchIndex++
+      } else {
+        this.switchIndex = 0
+      }
+      this.switch = shapeSwitch[this.switchIndex]
+      this.displayShape()
+    },
+    turnSide(side) {
+      let allow = this.checkSide(side)
+      if (!allow) {
+        return
+      }
+      if (this.x === 0 && side === -1 || this.x === this.block.length - 1 && side === 1) return
+      this.x = this.x + side
+      this.displayShape()
+    },
+    turnDown() {
+      let allow = this.checkDown()
+      if (!allow) {
+        return
+      }
+      this.downButton = true
+      if (this.clearArray.length !== 0) {
+        this.checkBlock()
+      }
+      this.goDown('button')
+      this.displayShape()
+      this.downButton = false
+    },
+    shape(next) {
+      let index = this.shapesIndex[this.shapesCounter + (next ? next : 0)]
+      let shape = tetrisShapes.getShapesByIndex(index)
+      if (this.setNewShape) {
+        this.switch = shape.switch[0]
+        this.setNewShape = false
+      }
+      return shape
+    },
+    setShapeIndex() {
+      for (let i = 0; i < 100; i++) {
+        let x = Math.floor(Math.random() * 7)
+        this.shapesIndex.push(x)
+      }
+    },
+    set() {
+
+      for (let i = 0; i < 10; i++) {
         var array = []
-        for (var g = 0; g < 10; g++) {
+        for (var g = 0; g < 20; g++) {
           let arr = []
           arr.push(i)
           arr.push(g)
@@ -89,28 +413,45 @@ export default {
         }
         this.net.push(array)
       }
-    }
+    },
+    setNextShapeNet() {
+
+      for (let i = 0; i < 4; i++) {
+        let array = []
+        for (let g = 0; g < 2; g++) {
+          let arr = []
+          arr.push(i)
+          arr.push(g)
+          array.push(arr)
+        }
+        this.nextShapeNet.push(array)
+      }
+    },
+
   },
   created() {
     this.set()
+    this.setNextShapeNet()
+    this.setShapeIndex()
   },
   mounted() {
-    this.gamePlay()
+    this.start = true
     window.addEventListener('keydown', (e) => {
       // const kayArray = [3]
       if (e.key == 'ArrowUp') {
-        this.turn('up')
+        this.turnUp()
       }
       if (e.key == 'ArrowLeft') {
         this.turnSide(-1)
       }
       if (e.key == 'ArrowDown') {
-        this.turn('down')
+        this.turnDown()
       }
       if (e.key == 'ArrowRight') {
         this.turnSide(1)
       }
     });
+    this.gamePlay()
   }
 
 
@@ -121,17 +462,21 @@ export default {
 .squre {
   background-color: aquamarine;
 }
+
 .squre_yellow {
   background-color: yellow;
 }
+
 .squre_red {
   background-color: red;
 }
-.joyStick{
+
+.joyStick {
   position: absolute;
   top: 440px;
 }
-.box{
+
+.box {
   align-content: center;
 }
 
