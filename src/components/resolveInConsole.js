@@ -1,16 +1,5 @@
-// let greySquare = document.querySelectorAll('.grey')
-// let squareWithNumber = []
-// let greenSquare = document.querySelectorAll('.green')
-//
-// let RENumberInit = / [1-9] /
-// for (let i =0; i<greySquare.length; i++){
-//
-//     if(RENumberInit.test(greySquare[i].innerHTML)){
-//
-//         squareWithNumber.push(greySquare[i])
-//     }
-//
-// }
+
+
 
 
 // declare
@@ -180,3 +169,17 @@ function checkIfCanClickLeft(numberInit, square) {
         })
     }
 }
+
+// let greySquare = document.querySelectorAll('.grey')
+// let squareWithNumber = []
+// let greenSquare = document.querySelectorAll('.green')
+//
+// let RENumberInit = / [1-9] /
+// for (let i =0; i<greySquare.length; i++){
+//
+//     if(RENumberInit.test(greySquare[i].innerHTML)){
+//
+//         squareWithNumber.push(greySquare[i])
+//     }
+//
+// }
