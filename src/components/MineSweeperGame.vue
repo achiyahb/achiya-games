@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h4 v-if="gameOver">המשחק נגמר</h4>
-    <h2 v-if="win">ניצחת!!!</h2>
+    <h4 v-if="gameOver">game over</h4>
+    <h2 v-if="win">you win!!!</h2>
     <div>
       <div>
     <span
@@ -17,15 +17,15 @@
     </div>
     </div>
       <div style="display: flex">
-        <span>משבצות מכוסות: {{ squareNum - revealSquare }}, דגלים: {{ flags }} </span>
+        <span>cover square: {{ squareNum - revealSquare }}, flags: {{ flags }} </span>
         <v-spacer></v-spacer>
-        <span>זמן- </span>
+        <span>time- </span>
         <timer :start="start" :stop="gameOver"/>
       </div>
 
 
 
-    <div dir="ltr" :style="`width: ${width}rem; display: grid;grid-template-columns: repeat(${number}, 1fr);`">
+    <div dir="ltr" :style="`width: ${width}rem; display: grid;grid-template-columns: repeat(${number}, 1fr);border-style: solid;`">
       <div v-for="(row,xKey) of net" class="box">
         <div
             :class="col[1] === 'flag' ? 'flag' : col[1] !== 'show' ? 'square' : col[0] === 'M' ? 'mine' : ''"

@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <v-btn v-if="!hide || !start" @click="start = !start; hide = true;">{{ start ? 'סיים' : 'התחל' }}</v-btn>
+    <v-btn v-if="!hide || !start" @click="start = !start; hide = true;">{{ start ? 'stop' : 'start' }}</v-btn>
     <tetris v-if="start" v-on:childToParent="hide = false"/>
   </div>
 </template>

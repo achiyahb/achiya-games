@@ -1,8 +1,8 @@
 <template>
   <v-container>
   <div>
-    <span :class="!circle ? 'ter' :'tey'">{{circle?'תור העיגול':'תור האיקס'}}</span>
-    <h1 v-if="winner" >המנצח הוא {{winner}}</h1>
+    <span :class="!circle ? 'ter' :'tey'">{{circle?'O turn':'X turn'}}</span>
+    <h1 v-if="winner" >The Winner Is {{winner}}</h1>
   </div>
     <v-row class="text-center" v-for="(array,key) of x">
       <v-col
@@ -16,7 +16,7 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-btn @click="clear()">אפס</v-btn>
+    <v-btn @click="clear()">restart</v-btn>
   </v-container>
 </template>
 
@@ -43,22 +43,23 @@
       },
 
       check() {
+        console.time()
         for (let i in this.x) {
           if (this.x[i][0][1] === this.x[i][1][1] && this.x[i][1][1] === this.x[i][2][1] && this.x[i][1][1]) {
             this.winner = this.x[i][1][1]
           }
-        }
-        for (let i in this.x) {
           if (this.x[0][i][1] === this.x[1][i][1] && this.x[1][i][1] === this.x[2][i][1] && this.x[2][i][1]) {
             this.winner = this.x[0][i][1]
           }
         }
+
         if (this.x[0][0][1] === this.x[1][1][1] && this.x[2][2][1] === this.x[1][1][1] && this.x[1][1][1]) {
           this.winner = this.x[1][1][1]
         }
         if (this.x[2][0][1] === this.x[1][1][1] && this.x[1][1][1] === this.x[0][2][1] && this.x[0][2][1]) {
           this.winner = this.x[1][1][1];
         }
+        console.timeEnd()
       },
       clear(){
         this.restartSystem()
@@ -80,6 +81,8 @@
         let y = [1,2,3]
         this.x[i] = y
       }
+
+
     }
   }
 </script>

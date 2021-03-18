@@ -9,7 +9,7 @@
     <!--    </v-col>-->
     <!--    </v-row>-->
     <!--    </v-container>-->
-    <v-btn v-if="!hide || !start" @click="start = !start; hide = true;">{{ start ? 'סיים' : 'התחל' }}</v-btn>
+    <v-btn v-if="!hide || !start" @click="start = !start; hide = true;">{{ start ? 'stop' : 'start' }}</v-btn>
     <snake-game v-if="start" :number="11" v-on:childToParent="hide = false"/>
   </div>
 </template>

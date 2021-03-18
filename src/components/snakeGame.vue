@@ -25,8 +25,8 @@
         <v-btn @click="turn('left')" >--></v-btn>
       </div>
 
-      <span v-if="even">אורך הנחש: {{ snake.length }} </span>
-      <span>ניקוד: {{ score }} </span>
+      <span v-if="even">snake length: {{ snake.length }} </span>
+      <span>score: {{ score }} </span>
     </v-col>
     </div>
   </div>
@@ -158,7 +158,6 @@ export default {
   mounted() {
     this.createSnake()
     window.addEventListener('keydown', (e) => {
-      // const kayArray = [3]
       if (e.key == 'ArrowUp') {
         this.turn('up')
       }

@@ -1,14 +1,14 @@
 <template>
   <v-container >
     <div style="display: flex; flex-direction: column; align-items: center">
-      <h1>שולה מוקשים</h1>
-      <v-btn @click="open = !open">{{open ? 'סגור' : 'פתח'}}</v-btn>
+      <h1>mine-sweeper-game</h1>
+      <v-btn @click="open = !open">{{open ? 'close' : 'open'}}</v-btn>
       <v-select
           style="margin-top: 2em"
           v-if="!open"
       v-model="squareNumber"
       :items="numbers"
-                label="מספר משבצות בשורה:"
+                label="square number on a row:"
       ></v-select>
       <mine-sweeper-game
           style="margin-top: 2em"
@@ -33,3 +33,7 @@ export default {
   })
 }
 </script>
+
+<style>
+
+</style>

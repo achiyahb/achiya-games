@@ -13,7 +13,7 @@
     </div>
     <div>
       <timer :start="start" :stop="gameOver"/>
-      <span>ניקוד: {{ score }} רמה: {{ level }}</span>
+      <span>score: {{ score }} level: {{ level }}</span>
     </div>
     <div style=" display: flex;">
     <div dir="ltr" style=" width: 8rem; display: grid;grid-template-columns: repeat(10, 1fr)">
@@ -437,7 +437,6 @@ export default {
   mounted() {
     this.start = true
     window.addEventListener('keydown', (e) => {
-      // const kayArray = [3]
       if (e.key == 'ArrowUp') {
         this.turnUp()
       }

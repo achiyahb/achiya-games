@@ -1,9 +1,7 @@
 <template>
   <v-app>
-
-
-    <v-main>
-  <router-view/>
+    <v-main >
+      <router-view/>
     </v-main>
   </v-app>
 </template>
@@ -22,7 +20,22 @@ export default {
     //
   }),
   created() {
-    this.$vuetify.rtl = true
+    this.$vuetify.rtl = false
   }
 };
 </script>
+
+
+<style>
+.v-main {
+  background-color: #ddd;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+}
+.main{
+
+}
+</style>

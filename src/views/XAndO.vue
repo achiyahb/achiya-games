@@ -1,7 +1,7 @@
 <template>
   <v-container >
     <div class="home">
-      <h1> איקס עיגול</h1>
+      <h1>tic tac toe</h1>
       <circle-and-exes/>
     </div>
   </v-container>
